@@ -1,23 +1,57 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+
+import "./App.scss";
+import Page from "./components/Page/Page";
+
+import AboutUs from "./pages/AboutUs/AboutUs";
+import PageNotFound from "./pages/PageNotFound/PageNotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions/TermsAndConditions";
+import * as routes from "./routes";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        <Routes>
+          <Route
+            path={routes.ABOUT_US}
+            exact
+            element={
+              <Page>
+                <AboutUs />
+              </Page>
+            }
+          />
+          <Route
+            path={routes.PRIVACY_POLICY}
+            exact
+            element={
+              <Page>
+                <PrivacyPolicy />
+              </Page>
+            }
+          />
+          <Route
+            path={routes.TERMS_AND_CONDITIONS}
+            exact
+            element={
+              <Page>
+                <TermsAndConditions />
+              </Page>
+            }
+          />
+          <Route
+            path="*"
+            exact
+            element={
+              <Page hideBottomNavbar>
+                <PageNotFound />
+              </Page>
+            }
+          />
+        </Routes>
+      </Router>
     </div>
   );
 }

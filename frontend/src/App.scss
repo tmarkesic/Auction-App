@@ -1,0 +1,39 @@
+@import "src/styles/variables.scss";
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap");
+
+.App {
+  text-align: center;
+  font-family: Lato;
+  h1 {
+    color: $darkGrey;
+    font-family: Lato;
+    font-weight: $Lato-Bold;
+    font-size: 40px;
+  }
+  h2 {
+    color: $darkGrey;
+    font-family: Lato;
+    font-weight: $Lato-Bold;
+    font-size: 32px;
+  }
+  h3,
+  a {
+    color: $darkGrey;
+  }
+  a:link {
+    text-decoration: none;
+  }
+  a:visited {
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+    color: $purple;
+  }
+  a:active {
+    text-decoration: underline;
+  }
+  .text-select {
+    cursor: pointer;
+  }
+}
