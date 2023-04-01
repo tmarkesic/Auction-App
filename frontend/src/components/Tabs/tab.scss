@@ -1,7 +1,7 @@
 @import "../../styles/variables";
 
 .tabs {
-  border-bottom: 3px solid #d8d8d8;
+  border-bottom: 3px solid $lightGrey;
   padding-left: 0;
   margin-left: 10em;
   margin-right: 10em;
@@ -24,5 +24,23 @@
     font-size: 18px;
     color: $darkGrey;
     cursor: pointer;
+  }
+}
+
+.secondary {
+  .tabs {
+    margin: 0;
+    border-bottom: 1px solid #d8d8d8;
+    .tab-list-active {
+      border-width: 0 0 1px 0;
+    }
+    .tab-list-item {
+      margin-bottom: -1px;
+      color: $purple;
+    }
+  }
+  .content {
+    color: $lightGrey;
+    margin-top: 25px;
   }
 }
