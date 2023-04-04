@@ -2,6 +2,7 @@ package com.internship.auctionapp.controller;
 
 import com.internship.auctionapp.dto.ItemDto;
 import com.internship.auctionapp.service.ItemService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class ItemController {
     }
 
     @GetMapping("/available")
-    public List<ItemDto> getAllAvailableItems(
+    public Page<ItemDto> getAllAvailableItems(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
@@ -47,4 +48,14 @@ public class ItemController {
     public ItemDto getItemById (@PathVariable(name = "id") UUID id){
         return itemService.getItemById(id);
     }
+
+    @GetMapping("/search")
+    public Page<ItemDto> searchItems(
+            @RequestParam("name") String name,
+            @RequestParam("category") String category,
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "2", required = false) int pageSize){
+        return itemService.searchItems(name, category, pageNo, pageSize);
+    }
+
 }

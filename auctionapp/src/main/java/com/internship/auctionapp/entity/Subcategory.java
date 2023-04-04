@@ -28,6 +28,7 @@ public class Subcategory {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
+
     private Category category;
 
     @OneToMany(mappedBy = "subcategory", cascade = CascadeType.ALL, orphanRemoval = true)

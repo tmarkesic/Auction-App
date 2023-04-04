@@ -51,22 +51,27 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getAllAvailableItems(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public Page<ItemDto> getAllAvailableItems(int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         LocalDateTime localDateTime = java.time.LocalDateTime.now();
         Page<Item> items = itemRepository.findByEndDateGreaterThanEqualAndStartDateLessThanEqual(localDateTime, localDateTime, pageable);
-        List<Item> itemList = items.getContent();
-        return itemList.stream()
-                .map(item -> mapToDto(item))
-                .collect(Collectors.toList());
+        return items.map(this::mapToDto);
     }
+
 
     @Override
     public ItemDto getItemById(UUID id) {
        return mapToDto(itemRepository.findById(id).get());
+    }
+
+    @Override
+    public Page<ItemDto> searchItems(String name, String category, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<Item> items = itemRepository.searchItems(name, category, pageable);
+        return items.map(this::mapToDto);
     }
 
     private ItemDto mapToDto(Item item) {

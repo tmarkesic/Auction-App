@@ -30,6 +30,7 @@ public class ImageServiceImpl implements ImageService {
         return images.stream()
                 .map(image -> mapToDto(image))
                 .collect(Collectors.toList());
+
     }
 
     private ImageDto mapToDto(Image image) {

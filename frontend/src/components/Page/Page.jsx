@@ -6,7 +6,7 @@ import TopNavbar from "../TopNavbar/TopNavbar";
 const Page = ({ children, hideBottomNavbar = false }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [children]);
 
   return (
     <>

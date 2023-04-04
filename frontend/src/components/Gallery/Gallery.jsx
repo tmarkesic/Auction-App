@@ -16,7 +16,9 @@ const Gallery = ({ id }) => {
 
   return (
     <div className="gallery">
-      <img src={images[selectedIndex]?.url} className="selected-image" />
+      <div className="selected-image">
+        <img src={images[selectedIndex]?.url} alt="product" />
+      </div>
       <div className="slideshow">
         {images.map((value, key) => (
           <img
@@ -26,6 +28,7 @@ const Gallery = ({ id }) => {
             onFocus={() => {
               setSelectedIndex(key);
             }}
+            alt="product"
           />
         ))}
       </div>
