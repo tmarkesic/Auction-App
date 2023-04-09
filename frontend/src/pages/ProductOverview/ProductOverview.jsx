@@ -22,17 +22,7 @@ const ProductOverview = () => {
 
   return (
     <div className="overview-page">
-      <div className="header">
-        <Breadcrumbs text={item.name} className="header-item-name" />
-        <div className="header-navigate">
-          <Breadcrumbs text="SHOP" className="header-navigate-breadcrumb" />
-          /
-          <Breadcrumbs
-            text="SINGLE PRODUCT"
-            className="header-navigate-breadcrumb"
-          />
-        </div>
-      </div>
+      <Breadcrumbs headline={item.name} />
       <div className="product-information">
         <Gallery id={id} className="content" />
         <div className="content">
@@ -52,10 +42,12 @@ const ProductOverview = () => {
               <span> {timeLeft}</span>
             </p>
           </div>
-          <Tabs labels={["Details"]} className="secondary">
-            <div>{item.description}</div>
-            <div />
-          </Tabs>
+          <div className="tab">
+            <Tabs labels={["Details"]} className="secondary">
+              <div>{item.description}</div>
+              <div />
+            </Tabs>
+          </div>
         </div>
       </div>
     </div>

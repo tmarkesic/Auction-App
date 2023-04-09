@@ -23,13 +23,17 @@ const Shop = () => {
   const [checkedCategory, setCheckedCategory] = useState(category);
   const [lastPage, setLastPage] = useState(false);
   const [page, setPage] = useState(1);
+  const [didYouMean, setDidYouMean] = useState("");
 
   useEffect(() => {
     itemService.getSearchedItems(name, category, 0).then((res) => {
-      setItems(res.content);
-      setLastPage(res.last);
+      setItems(res.items.content);
+      setLastPage(res.items.last);
+      setDidYouMean(res.didYouMean);
+      if (didYouMean !== "") {
+        name = didYouMean;
+      }
     });
-    categoryService.getAllCategories().then((res) => setCategories(res));
   }, [name, category]);
 
   useEffect(() => {
@@ -44,18 +48,33 @@ const Shop = () => {
       setCheckedCategory(event.target.value);
       setSearchParams({ name: name, category: event.target.value });
     }
+    setPage(1);
   };
 
   const fetchData = () => {
     itemService.getSearchedItems(name, category, page).then((res) => {
-      setItems([...items, ...res.content]);
-      setLastPage(res.last);
+      setItems([...items, ...res.items.content]);
+      setLastPage(res.items.last);
       setPage(page + 1);
     });
   };
 
+  const fetchSuggestedData = () => {
+    itemService.getSearchedItems(didYouMean, category, 0).then((res) => {
+      setItems(res.items.content);
+      setLastPage(res.items.last);
+    });
+    setSearchParams({ name: didYouMean, category: category });
+  };
+
   return (
     <div className="shop-page">
+      {didYouMean !== "" && items.length === 0 && (
+        <div className="did-you-mean">
+          Did you mean?
+          <span onClick={fetchSuggestedData}>{didYouMean}</span>
+        </div>
+      )}
       {items.length === 0 ? (
         <div className="item-not-found">
           <h1>No results found.</h1>

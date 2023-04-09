@@ -13,11 +13,15 @@ import java.util.UUID;
 public interface ItemRepository extends JpaRepository<Item, UUID> {
     Item findFirstByEndDateGreaterThanEqualAndStartDateLessThanEqual (LocalDateTime endDate, LocalDateTime startDate);
     Page<Item> findByEndDateGreaterThanEqualAndStartDateLessThanEqual (LocalDateTime endDate, LocalDateTime startDate, Pageable pageable);
+    List<Item> findByEndDateGreaterThanEqualAndStartDateLessThanEqual(LocalDateTime endDate, LocalDateTime startDate);
     @Query ("SELECT i FROM Item i " +
             "WHERE i.endDate >= NOW() AND i.startDate <= NOW() " +
             "AND (LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%') ) " +
             "OR LOWER(i.category.name) LIKE LOWER(CONCAT('%', :name, '%') ) )" +
             "AND i.category.name LIKE CONCAT('%', :category, '%') ")
     Page<Item> searchItems (String name, String category, Pageable pageable);
+    @Query ("SELECT i.name FROM Item i " +
+            "WHERE i.endDate >= NOW() AND i.startDate <= NOW()")
+    List<String> findAllNames();
 
 }

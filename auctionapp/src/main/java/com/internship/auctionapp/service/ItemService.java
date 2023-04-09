@@ -1,6 +1,7 @@
 package com.internship.auctionapp.service;
 
 import com.internship.auctionapp.dto.ItemDto;
+import com.internship.auctionapp.response.ItemResponse;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public interface ItemService {
     ItemDto getFirstAvailableItem();
     Page<ItemDto> getAllAvailableItems(int pageNo, int pageSize, String sortBy, String sortDir);
     ItemDto getItemById (UUID id);
-    Page<ItemDto> searchItems (String name, String category, int pageNo, int pageSize);
+    ItemResponse searchItems (String name, String category, int pageNo, int pageSize);
 
 
 }

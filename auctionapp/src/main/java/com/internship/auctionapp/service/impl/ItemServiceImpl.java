@@ -3,7 +3,10 @@ package com.internship.auctionapp.service.impl;
 import com.internship.auctionapp.dto.ItemDto;
 import com.internship.auctionapp.entity.Item;
 import com.internship.auctionapp.repository.ItemRepository;
+import com.internship.auctionapp.response.ItemResponse;
 import com.internship.auctionapp.service.ItemService;
+import com.internship.auctionapp.util.StringComparison;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
 import org.springframework.data.domain.Page;
@@ -39,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
         Page<Item> items = itemRepository.findAll(pageable);
         List<Item> itemList = items.getContent();
         return itemList.stream()
-                .map(item -> mapToDto(item))
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
@@ -64,14 +67,22 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItemById(UUID id) {
-       return mapToDto(itemRepository.findById(id).get());
+        return mapToDto(itemRepository.findById(id).get());
     }
 
     @Override
-    public Page<ItemDto> searchItems(String name, String category, int pageNo, int pageSize) {
+    public ItemResponse searchItems(String name, String category, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<Item> items = itemRepository.searchItems(name, category, pageable);
-        return items.map(this::mapToDto);
+        String didYouMean = "";
+        if (items.isEmpty() && !StringUtils.isEmpty(name)) {
+            List<String> itemNames = itemRepository.findAllNames();
+            didYouMean = StringComparison
+                    .getSuggestedName(name, itemNames)
+                    .orElse("");
+        }
+        return new ItemResponse(
+                items.map(this::mapToDto), didYouMean);
     }
 
     private ItemDto mapToDto(Item item) {
@@ -81,8 +92,7 @@ public class ItemServiceImpl implements ItemService {
                 mapper.map(src -> src.getSubcategory().getId(), ItemDto::setSubcategoryId);
             });
         }
-        ItemDto itemDto = mapper.map(item, ItemDto.class);
-        return itemDto;
+        return mapper.map(item, ItemDto.class);
     }
 
 }

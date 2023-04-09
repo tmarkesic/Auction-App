@@ -1,6 +1,7 @@
 package com.internship.auctionapp.controller;
 
 import com.internship.auctionapp.dto.ItemDto;
+import com.internship.auctionapp.response.ItemResponse;
 import com.internship.auctionapp.service.ItemService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +51,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Page<ItemDto> searchItems(
+    public ItemResponse searchItems(
             @RequestParam("name") String name,
             @RequestParam("category") String category,
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
@@ -59,3 +60,4 @@ public class ItemController {
     }
 
 }
+

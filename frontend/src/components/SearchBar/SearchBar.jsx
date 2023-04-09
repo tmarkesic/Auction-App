@@ -9,10 +9,12 @@ import { SHOP } from "../../routes";
 import "./search-bar.scss";
 
 const SearchBar = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [searchParams] = useSearchParams();
 
+  const name = searchParams.get("name") || "";
   const category = searchParams.get("category") || "";
+
+  const [searchTerm, setSearchTerm] = useState(name);
 
   const params = { name: searchTerm, category: category };
   const navigate = useNavigate();

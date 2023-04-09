@@ -11,7 +11,10 @@
     align-items: center;
     justify-content: space-between;
     .header-navigate {
-      margin: 0 10em;
+      margin: 0 10em 0 0;
+    }
+    .header-item-name {
+      margin: 0 4em 0 10em;
     }
   }
   .product-information {
@@ -44,6 +47,9 @@
       display: inline-block;
       border: 1px solid $lightestGrey;
       padding: 0 1.5em;
+    }
+    .tab {
+      margin-bottom: 50px;
     }
   }
 }
