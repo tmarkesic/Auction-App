@@ -1,89 +1,40 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-
 import "./App.scss";
-import Page from "./components/Page/Page";
 
-import AboutUs from "./pages/AboutUs/AboutUs";
-import LandingPage from "./pages/LandingPage/LandingPage";
-import PageNotFound from "./pages/PageNotFound/PageNotFound";
-import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
-import ProductOverview from "./pages/ProductOverview/ProductOverview";
-import Shop from "./pages/Shop/Shop";
-import TermsAndConditions from "./pages/TermsAndConditions/TermsAndConditions";
-import * as routes from "./routes";
+import { useEffect } from "react";
+import { BrowserRouter } from "react-router-dom";
+import useAuth from "./hooks/useAuth";
+import RouteElements from "./routes/RouteElements";
+import {
+  getTokenFromBrowser,
+  getTokenFromSession,
+  getUserFromBrowser,
+  getUserFromSession,
+} from "./utils/JwtSession";
 
-function App() {
+const App = () => {
+  const { setAuth } = useAuth();
+
+  useEffect(() => {
+    if (getUserFromSession() != null) {
+      setAuth({
+        user: getUserFromSession(),
+        accessToken: getTokenFromSession(),
+      });
+    } else if (getUserFromBrowser() != null) {
+      setAuth({
+        user: getUserFromBrowser(),
+        accessToken: getTokenFromBrowser(),
+      });
+    }
+  }, []);
+
   return (
     <div className="App">
-      <Router>
-        <Routes>
-          <Route
-            path={routes.ABOUT_US}
-            exact
-            element={
-              <Page>
-                <AboutUs />
-              </Page>
-            }
-          />
-          <Route
-            path={routes.PRIVACY_POLICY}
-            exact
-            element={
-              <Page>
-                <PrivacyPolicy />
-              </Page>
-            }
-          />
-          <Route
-            path={routes.TERMS_AND_CONDITIONS}
-            exact
-            element={
-              <Page>
-                <TermsAndConditions />
-              </Page>
-            }
-          />
-          <Route
-            path="/"
-            exact
-            element={
-              <Page>
-                <LandingPage />
-              </Page>
-            }
-          />
-          <Route
-            path={routes.PRODUCT_OVERVIEW}
-            exact
-            element={
-              <Page>
-                <ProductOverview />
-              </Page>
-            }
-          />
-          <Route
-            path={routes.SHOP}
-            exact
-            element={
-              <Page>
-                <Shop />
-              </Page>
-            }
-          />
-          <Route
-            path="*"
-            exact
-            element={
-              <Page hideBottomNavbar>
-                <PageNotFound />
-              </Page>
-            }
-          />
-        </Routes>
-      </Router>
+      <BrowserRouter>
+        <RouteElements />
+      </BrowserRouter>
     </div>
   );
-}
+};
 
 export default App;
