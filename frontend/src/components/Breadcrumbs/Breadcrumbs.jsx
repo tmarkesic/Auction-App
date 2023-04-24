@@ -10,11 +10,32 @@ import {
 import "./breadcrumbs.scss";
 
 const routes = [
+  { path: "/", breadcrumb: null },
   { path: ABOUT_US, breadcrumb: "About Us" },
   { path: TERMS_AND_CONDITIONS, breadcrumb: "Terms and Conditions" },
   { path: PRIVACY_POLICY, breadcrumb: "Privacy Policy" },
   { path: "items", breadcrumb: null },
   { path: PRODUCT_OVERVIEW, breadcrumb: "Product Overview" },
+  {
+    path: "my-account",
+    children: [
+      {
+        path: ":id",
+        children: [
+          {
+            path: "seller",
+            breadcrumb: "Seller",
+          },
+          {
+            path: "bids",
+            breadcrumb: "Bids",
+          },
+        ],
+        breadcrumb: null,
+      },
+    ],
+    breadcrumb: "My Account",
+  },
 ];
 
 const Breadcrumbs = ({ headline }) => {
@@ -31,7 +52,11 @@ const Breadcrumbs = ({ headline }) => {
             <React.Fragment key={index}>
               <Link
                 key={match.url}
-                to={match.pathname}
+                to={
+                  match.pathname === "/my-account"
+                    ? breadcrumbs[match + 1]
+                    : match.pathname
+                }
                 className={
                   match.pathname === location.pathname
                     ? "breadcrumb-active"

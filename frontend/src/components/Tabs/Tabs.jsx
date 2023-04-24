@@ -1,10 +1,30 @@
 import classNames from "classnames";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "./tab.scss";
 
-const Tabs = ({ children, labels, className }) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+const Tabs = ({
+  children,
+  labels,
+  className,
+  Icons,
+  selectedTab = 0,
+  navigateTo = false,
+}) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [selectedIndex, setSelectedIndex] = useState(selectedTab);
+
+  useEffect(() => {
+    setSelectedIndex(selectedTab);
+  }, [selectedTab]);
+
   const handleClick = (index) => {
+    if (navigateTo) {
+      labels[index] = labels[index].toLowerCase();
+      navigate(`/my-account/${id}/${labels[index]}`);
+    }
     setSelectedIndex(index);
   };
 
@@ -14,7 +34,9 @@ const Tabs = ({ children, labels, className }) => {
         {labels.map((value, key) => (
           <button
             key={`tab-${key}`}
-            onClick={() => handleClick(key)}
+            onClick={() => {
+              handleClick(key);
+            }}
             onFocus={() => {
               setSelectedIndex(key);
             }}
@@ -22,6 +44,7 @@ const Tabs = ({ children, labels, className }) => {
               "tab-list-active": selectedIndex === key,
             })}
           >
+            {Icons && <img src={Icons[key]} alt="icon" />}
             {value}
           </button>
         ))}

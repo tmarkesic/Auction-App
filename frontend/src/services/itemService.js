@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BASE_URL } from "../config";
+import { ApiRequest, BASE_URL } from "../config";
 
 async function getFirstItem() {
   const result = await axios.get(`${BASE_URL}/items/first-available`);
@@ -32,10 +32,30 @@ async function getSearchedItems(name, category, pageNo) {
   return result.data || [];
 }
 
+async function getActiveItemsBySellerId(sellerId, token) {
+  const result = await ApiRequest(token).get(
+    `/items/seller/active/${sellerId}`
+  );
+  return result.data || [];
+}
+
+async function getSoldItemsBySellerId(sellerId, token) {
+  const result = await ApiRequest(token).get(`/items/seller/sold/${sellerId}`);
+  return result.data || [];
+}
+
+async function getBiddedOnItemsBySellerId(sellerId, token) {
+  const result = await ApiRequest(token).get(`/items/seller/bids/${sellerId}`);
+  return result.data || [];
+}
+
 export const itemService = {
   getFirstItem,
   getNewArrivals,
   getLastChance,
   getItemById,
   getSearchedItems,
+  getActiveItemsBySellerId,
+  getSoldItemsBySellerId,
+  getBiddedOnItemsBySellerId,
 };

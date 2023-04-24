@@ -4,6 +4,7 @@ import com.internship.auctionapp.dto.ItemDto;
 import com.internship.auctionapp.response.ItemResponse;
 import com.internship.auctionapp.service.ItemService;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ItemDto getItemById (@PathVariable(name = "id") UUID id){
+    public ItemDto getItemById(@PathVariable(name = "id") UUID id) {
         return itemService.getItemById(id);
     }
 
@@ -55,9 +56,26 @@ public class ItemController {
             @RequestParam("name") String name,
             @RequestParam("category") String category,
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "2", required = false) int pageSize){
+            @RequestParam(value = "pageSize", defaultValue = "2", required = false) int pageSize) {
         return itemService.searchItems(name, category, pageNo, pageSize);
     }
 
+
+    @GetMapping("/seller/active/{id}")
+    @PreAuthorize("#id == authentication.principal.id")
+    public List<ItemDto> getActiveSellerItems(@PathVariable(name = "id") UUID id) {
+        return itemService.getActiveSellerItems(id);
+    }
+
+    @GetMapping("/seller/sold/{id}")
+    @PreAuthorize("#id == authentication.principal.id")
+    public List<ItemDto> getSoldSellerItems(@PathVariable(name = "id") UUID id) {
+        return itemService.getSoldSellerItems(id);
+    }
+    @GetMapping("/seller/bids/{id}")
+    @PreAuthorize("#id == authentication.principal.id")
+    public List<ItemDto> getBiddedOnItemsByUser(@PathVariable(name = "id") UUID id){
+        return itemService.getBiddedOnItemsByUser(id);
+    }
 }
 
