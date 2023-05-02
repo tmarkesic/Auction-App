@@ -2,7 +2,9 @@ package com.internship.auctionapp.service.impl;
 
 import com.internship.auctionapp.dto.ItemDto;
 import com.internship.auctionapp.entity.Bid;
+import com.internship.auctionapp.entity.Bid;
 import com.internship.auctionapp.entity.Item;
+import com.internship.auctionapp.repository.BidRepository;
 import com.internship.auctionapp.repository.BidRepository;
 import com.internship.auctionapp.repository.ItemRepository;
 import com.internship.auctionapp.response.ItemResponse;
@@ -10,7 +12,6 @@ import com.internship.auctionapp.service.ItemService;
 import com.internship.auctionapp.util.StringComparison;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,12 +31,10 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final BidRepository bidRepository;
     private final ModelMapper mapper;
-    TypeMap<Item, ItemDto> typeMapToDto;
 
     public ItemServiceImpl(ItemRepository itemRepository, ModelMapper mapper, BidRepository bidRepository) {
         this.itemRepository = itemRepository;
         this.mapper = mapper;
-        typeMapToDto = mapper.createTypeMap(Item.class, ItemDto.class);
         this.bidRepository = bidRepository;
     }
 
@@ -100,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
                         sellerId
                 );
         return items.stream()
-                .map(item -> mapToDto(item))
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
@@ -129,14 +129,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private ItemDto mapToDto(Item item) {
-        if (typeMapToDto == null) {
-            typeMapToDto.addMappings(mapper -> {
-                mapper.map(src -> src.getCategory().getId(), ItemDto::setCategoryId);
-                mapper.map(src -> src.getSubcategory().getId(), ItemDto::setSubcategoryId);
-                mapper.map(src -> src.getBuyer().getId(), ItemDto::setBuyerId);
-                mapper.map(src -> src.getSeller().getId(), ItemDto::setSellerId);
-            });
-        }
         return mapper.map(item, ItemDto.class);
     }
 

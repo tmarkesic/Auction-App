@@ -31,3 +31,10 @@ export const loginValidationSchema = yup.object().shape({
     .required("Email is required"),
   password: yup.string().required("Password is required"),
 });
+
+export const newBidValidationSchema = yup.object().shape({
+  amount: yup
+    .number()
+    .max(100000000000000, "Bid can't be greater than 100000000000000")
+    .required(),
+});
