@@ -1,5 +1,7 @@
+export { ReactComponent as XIcon } from "./X.svg";
 export { ReactComponent as AppLogo } from "./appLogo.svg";
 export { ReactComponent as ArrowRight } from "./arrowRight.svg";
+export { ReactComponent as CalendarIcon } from "./calendar.svg";
 export { ReactComponent as FacebookIcon } from "./fbIcon.svg";
 export { ReactComponent as InstagramIcon } from "./igIcon.svg";
 export { ReactComponent as PlusIcon } from "./plus.svg";

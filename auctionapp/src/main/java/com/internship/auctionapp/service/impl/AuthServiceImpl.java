@@ -1,5 +1,6 @@
 package com.internship.auctionapp.service.impl;
 
+import com.internship.auctionapp.aws.FileStore;
 import com.internship.auctionapp.dto.UserDto;
 import com.internship.auctionapp.entity.Role;
 import com.internship.auctionapp.entity.User;
@@ -34,18 +35,21 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils tokenProvider;
     private final ModelMapper mapper;
+    private final FileStore fileStore;
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtUtils tokenProvider, ModelMapper mapper) {
+                           JwtUtils tokenProvider, ModelMapper mapper,
+                           FileStore fileStore) {
         this.mapper = mapper;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
+        this.fileStore = fileStore;
     }
 
     @Override

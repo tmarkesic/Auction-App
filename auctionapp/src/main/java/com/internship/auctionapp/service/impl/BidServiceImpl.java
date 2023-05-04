@@ -52,7 +52,8 @@ public class BidServiceImpl implements BidService {
     private Bid mapToEntity(BidDto bidDto) {
         return mapper.map(bidDto, Bid.class);
     }
-    private void checkBidValidity(BidDto bidDto, Item item){
+
+    private void checkBidValidity(BidDto bidDto, Item item) {
         LocalDateTime now = java.time.LocalDateTime.now();
         if (bidDto.getAmount() < item.getStartPrice()) {
             throw new BadRequestException("Bid cannot be lower than item's start price.");
