@@ -2,10 +2,13 @@ package com.internship.auctionapp.controller;
 
 import com.internship.auctionapp.dto.ItemDto;
 import com.internship.auctionapp.request.ItemRequest;
+import com.internship.auctionapp.request.PaymentRequest;
 import com.internship.auctionapp.response.ItemResponse;
+import com.internship.auctionapp.response.PaymentResponse;
 import com.internship.auctionapp.service.ItemService;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Charge;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -88,5 +91,6 @@ public class ItemController {
     public ItemDto addNewItem(@PathVariable("id") UUID id, @RequestPart("item") ItemRequest item, @RequestPart("files") List<MultipartFile> files) {
         return itemService.addNewItem(item, files, id);
     }
+
 }
 

@@ -24,6 +24,7 @@ import {
 } from "./routes";
 
 import React from "react";
+import Payment from "../components/Payment/Payment";
 
 const RouteElements = () => {
   const element = useRoutes([
@@ -114,6 +115,14 @@ const RouteElements = () => {
       element: (
         <Page hideBottomNavbar>
           <PageNotFound />
+        </Page>
+      ),
+    },
+    {
+      path: "/proba",
+      element: (
+        <Page>
+          <Payment />
         </Page>
       ),
     },

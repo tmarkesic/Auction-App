@@ -6,10 +6,12 @@ import Breadcrumbs from "../../components/Breadcrumbs/Breadcrumbs";
 import Button from "../../components/Button/Button";
 import Gallery from "../../components/Gallery/Gallery";
 import InputField from "../../components/InputField/InputField";
+import Payment from "../../components/Payment/Payment";
+import PopUp from "../../components/PopUp/PopUp";
 import Tabs from "../../components/Tabs/Tabs";
 import useAuth from "../../hooks/useAuth";
 import { ArrowRight } from "../../resources/icons";
-import { addNewBid } from "../../services/bidService";
+import { addNewBid, bidService } from "../../services/bidService";
 import { itemService } from "../../services/itemService";
 import { newBidValidationSchema } from "../../utils/formValidation";
 import { utils } from "../../utils/utils";
@@ -20,13 +22,31 @@ const ProductOverview = () => {
   const [notificationMsg, setNotificationMsg] = useState("");
   const [notificationClassName, setNotificatonClassName] = useState("");
   const [successfulBid, setSuccessfulBid] = useState(false);
+  const [isUserHighestBidder, setIsUserHighestBidder] = useState(false);
+  const [openPopUpPayment, setOpenPopUpPayment] = useState(false);
+  const [openPopUpBid, setOpenPopUpBid] = useState(false);
+  const [isBought, setIsBought] = useState(false);
+  const [formValues, setFormValues] = useState([]);
 
   const { id } = useParams();
   const { auth } = useAuth();
 
   useEffect(() => {
+    if (Object.keys(auth).length !== 0) {
+      bidService
+        .isHighestBidder(id, auth?.user?.id)
+        .then((res) => setIsUserHighestBidder(res));
+    }
+  }, [auth, id]);
+
+  useEffect(() => {
     setSuccessfulBid(false);
-    itemService.getItemById(id).then((res) => setItem(res));
+    itemService.getItemById(id).then((res) => {
+      setItem(res);
+      if (res.buyerId) {
+        setIsBought(true);
+      }
+    });
   }, [id, successfulBid]);
 
   const price = utils.parseNum(item.startPrice);
@@ -35,7 +55,7 @@ const ProductOverview = () => {
   const newBid = utils.addFloats(highestBid, 1);
   const hasEndDatePassed = utils.hasDatePassed(item.endDate);
 
-  const handleSubmit = async (value) => {
+  const submitBid = async (value) => {
     try {
       const bid = {
         userId: auth?.user.id,
@@ -44,7 +64,7 @@ const ProductOverview = () => {
       };
       await addNewBid(bid, auth?.accessToken);
       if (value.amount > highestBid) {
-        setNotificationMsg("Congrats! You are the highest bidder!");
+        setNotificationMsg("You are the highest bidder!");
         setNotificatonClassName("valid-amount");
         setSuccessfulBid(true);
       }
@@ -54,9 +74,7 @@ const ProductOverview = () => {
         setNotificationMsg("No Server Response");
       } else if (error.response?.status === 400) {
         if (value.amount <= highestBid) {
-          setNotificationMsg(
-            "There are higher bids than yours. You could give it a second try!"
-          );
+          setNotificationMsg("There are higher bids than yours.");
           setNotificatonClassName("invalid-amount");
         }
       } else {
@@ -65,8 +83,43 @@ const ProductOverview = () => {
     }
   };
 
+  const handleSubmit = async (value) => {
+    setOpenPopUpBid(true);
+    setFormValues(value);
+  };
+
   return (
     <div className="overview-page">
+      {openPopUpPayment && (
+        <PopUp closePopUp={setOpenPopUpPayment} className="payment-modal">
+          <Payment item={item} isBought={setIsBought} />
+        </PopUp>
+      )}
+      {openPopUpBid && (
+        <PopUp closePopUp={setOpenPopUpBid} className="are-you-sure">
+          <h3 className="title">Are you sure?</h3>
+          <div>
+            <div className="property">You're about to bid on: </div>
+            <div className="value">{item.name}</div>
+            <div className="footer">
+              <Button
+                text="CANCEL"
+                type="tertiary"
+                className="text-dark"
+                onClick={() => setOpenPopUpBid(false)}
+              />
+              <Button
+                text="CONTINUE"
+                type="primary"
+                onClick={() => {
+                  setOpenPopUpBid(false);
+                  submitBid(formValues);
+                }}
+              />
+            </div>
+          </div>
+        </PopUp>
+      )}
       <Breadcrumbs headline={item.name} />
       {notificationMsg && (
         <div
@@ -75,8 +128,9 @@ const ProductOverview = () => {
           {notificationMsg}
         </div>
       )}
+
       <div className="product-information">
-        <Gallery id={id} className="content" />
+        <Gallery id={id} sellerId={item.sellerId} className="content" />
         <div className="content">
           <h1>{item.name}</h1>
           <p className="starts-from">
@@ -89,10 +143,16 @@ const ProductOverview = () => {
             <p>
               Number of bids: <span>{item.noBids}</span>
             </p>
-            <p>
-              Time left:
-              <span> {timeLeft}</span>
-            </p>
+            {hasEndDatePassed ? (
+              <p>
+                Auction: <span>finished</span>
+              </p>
+            ) : (
+              <p>
+                Time left:
+                <span> {timeLeft}</span>
+              </p>
+            )}
           </div>
           {auth?.user && auth?.user.id !== item.sellerId && !hasEndDatePassed && (
             <Formik
@@ -100,7 +160,10 @@ const ProductOverview = () => {
               initialValues={{
                 amount: "",
               }}
-              onSubmit={handleSubmit}
+              onSubmit={(values, { resetForm }) => {
+                handleSubmit(values);
+                resetForm();
+              }}
             >
               <Form>
                 <div className="input-fields">
@@ -123,6 +186,30 @@ const ProductOverview = () => {
               </Form>
             </Formik>
           )}
+          {auth?.user &&
+            auth?.user.id !== item.sellerId &&
+            hasEndDatePassed &&
+            isUserHighestBidder && (
+              <div className="pay-button">
+                {isBought ? (
+                  <Button
+                    text="BOUGHT"
+                    type="disabled"
+                    className="btn-full-width"
+                    disabled
+                  />
+                ) : (
+                  <Button
+                    text="PAY"
+                    type="primary"
+                    className="btn-full-width"
+                    onClick={() => {
+                      setOpenPopUpPayment(true);
+                    }}
+                  />
+                )}
+              </div>
+            )}
           <div className="tab">
             <Tabs labels={["Details"]} className="secondary">
               <div>{item.description}</div>

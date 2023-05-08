@@ -8,11 +8,17 @@ import com.internship.auctionapp.entity.Image;
 import com.internship.auctionapp.entity.Item;
 import com.internship.auctionapp.entity.User;
 import com.internship.auctionapp.exception.BadRequestException;
+import com.internship.auctionapp.exception.NotFoundException;
 import com.internship.auctionapp.repository.*;
 import com.internship.auctionapp.request.ItemRequest;
+import com.internship.auctionapp.request.PaymentRequest;
 import com.internship.auctionapp.response.ItemResponse;
+import com.internship.auctionapp.response.PaymentResponse;
 import com.internship.auctionapp.service.ItemService;
+import com.internship.auctionapp.service.PaymentService;
 import com.internship.auctionapp.util.StringComparison;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Charge;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.modelmapper.ModelMapper;
@@ -40,10 +46,12 @@ public class ItemServiceImpl implements ItemService {
     private final SubcategoryRepository subcategoryRepository;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
+    private final ShipmentRepository shipmentRepository;
+    private final PaymentService paymentService;
     private final ModelMapper mapper;
     private final FileStore fileStore;
 
-    public ItemServiceImpl(ItemRepository itemRepository, ModelMapper mapper, BidRepository bidRepository, CategoryRepository categoryRepository, SubcategoryRepository subcategoryRepository, UserRepository userRepository, ImageRepository imageRepository, FileStore fileStore) {
+    public ItemServiceImpl(ItemRepository itemRepository, ModelMapper mapper, BidRepository bidRepository, CategoryRepository categoryRepository, SubcategoryRepository subcategoryRepository, UserRepository userRepository, ImageRepository imageRepository, ShipmentRepository shipmentRepository, PaymentService paymentService, FileStore fileStore) {
         this.itemRepository = itemRepository;
         this.mapper = mapper;
         this.bidRepository = bidRepository;
@@ -51,6 +59,8 @@ public class ItemServiceImpl implements ItemService {
         this.subcategoryRepository = subcategoryRepository;
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
+        this.shipmentRepository = shipmentRepository;
+        this.paymentService = paymentService;
         this.fileStore = fileStore;
     }
 

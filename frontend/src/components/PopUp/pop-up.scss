@@ -1,0 +1,89 @@
+@import "src/styles/variables.scss";
+
+.modal {
+  color: $darkGrey;
+  .modalBackground {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    background: radial-gradient(transparent 20%, white 70%);
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -120px;
+  }
+
+  .modalContainer {
+    width: 500px;
+    height: 500px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    .titleCloseBtn {
+      display: flex;
+      justify-content: flex-end;
+      margin: 0 20px;
+      button {
+        background-color: transparent;
+        border: none;
+        font-size: 25px;
+        cursor: pointer;
+      }
+    }
+    .title {
+      display: inline-block;
+      text-align: center;
+      margin: 0 20x;
+    }
+    .body {
+      flex: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 20px;
+    }
+  }
+}
+.payment-modal {
+  .modalContainer {
+    min-height: 600px;
+    height: auto;
+  }
+}
+
+.are-you-sure {
+  .modalContainer {
+    height: 350px;
+    .body {
+      display: block;
+      .title {
+        font-size: 24px;
+        background-color: $white;
+        padding: 1em 0;
+        margin: 0 0 1em;
+        width: 100%;
+      }
+      .property {
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+      .value {
+        color: $purple;
+        font-size: 18px;
+        font-weight: $Lato-Bold;
+      }
+      .footer {
+        margin: 20px 0;
+        display: flex;
+        background-color: white;
+        align-items: center;
+        justify-content: space-between;
+        height: auto;
+      }
+    }
+  }
+}

@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BidServiceImpl implements BidService {
@@ -43,6 +45,18 @@ public class BidServiceImpl implements BidService {
             bid = bidRepository.save(mapToEntity(bidDto));
             return new ResponseEntity<>(mapToDto(bid), HttpStatus.CREATED);
         }
+    }
+
+    @Override
+    public boolean isHighestBidder(UUID itemId, UUID userId) {
+        Bid bid = bidRepository.findBiggestBidByItemId(itemId);
+        if(bid != null) return bid.getUser().getId().equals(userId);
+        return false;
+    }
+
+    @Override
+    public BidDto findBidByUserAndItem(UUID userId, UUID itemId) {
+        return mapToDto(bidRepository.findByUserIdAndItemId(userId, itemId));
     }
 
     private BidDto mapToDto(Bid bid) {
