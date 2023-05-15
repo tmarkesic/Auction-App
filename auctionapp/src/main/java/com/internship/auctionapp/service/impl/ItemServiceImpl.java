@@ -8,17 +8,12 @@ import com.internship.auctionapp.entity.Image;
 import com.internship.auctionapp.entity.Item;
 import com.internship.auctionapp.entity.User;
 import com.internship.auctionapp.exception.BadRequestException;
-import com.internship.auctionapp.exception.NotFoundException;
 import com.internship.auctionapp.repository.*;
 import com.internship.auctionapp.request.ItemRequest;
-import com.internship.auctionapp.request.PaymentRequest;
 import com.internship.auctionapp.response.ItemResponse;
-import com.internship.auctionapp.response.PaymentResponse;
 import com.internship.auctionapp.service.ItemService;
 import com.internship.auctionapp.service.PaymentService;
 import com.internship.auctionapp.util.StringComparison;
-import com.stripe.exception.StripeException;
-import com.stripe.model.Charge;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.modelmapper.ModelMapper;
@@ -181,6 +176,89 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("Could not save item");
         }
         return mapToDto(item);
+    }
+
+    @Override
+    public List<ItemDto> getRecommendedItems(UUID userId) {
+        List<Item> interestedIn = itemRepository.findItemsUserIsInterestedIn(userId);
+        List<Item> finalItems = new ArrayList<>();
+
+        if (interestedIn.size() == 0) {
+            return new ArrayList<>();
+        }
+
+        Map<UUID, Integer> recommendedCategories = new HashMap<>();
+        List<Double> listOfPrices = new ArrayList<>();
+
+        getRecommendedCategoriesAndAvgPrices(interestedIn, listOfPrices, recommendedCategories);
+
+        Map<UUID, Integer> sortedCategories = sortMap(recommendedCategories);
+
+        finalItems = getItemsRecommendedByCategory(sortedCategories, userId);
+
+        if (finalItems.size() >= 3) {
+            return finalItems.stream()
+                    .limit(3)
+                    .map(this::mapToDto)
+                    .collect(Collectors.toList());
+        }
+
+        double avgPrice = calculateListAverage(listOfPrices);
+
+        finalItems.addAll(getItemsRecommendedByPrice(userId, avgPrice));
+
+        if (finalItems.size() >= 3) {
+            return finalItems.stream()
+                    .limit(3)
+                    .map(this::mapToDto)
+                    .collect(Collectors.toList());
+        }
+
+        return new ArrayList<>();
+    }
+
+    private List<Item> getItemsRecommendedByPrice(UUID userId, double avgPrice) {
+        return itemRepository.findRecommendedItemsByPrice(userId, avgPrice);
+    }
+
+    private double calculateListAverage(List<Double> list) {
+        double sum = 0;
+        for (Double listOfPrice : list) {
+            sum = sum + listOfPrice;
+        }
+        return sum / list.size();
+    }
+
+    private List<Item> getItemsRecommendedByCategory(Map<UUID, Integer> categories, UUID userId) {
+        List<Item> items = new ArrayList<>();
+        for (UUID id : categories.keySet()) {
+            List<Item> itemsByCategory = itemRepository.findRecommendedItemsByCategory(userId, id);
+            items.addAll(itemsByCategory);
+            if (items.size() >= 3) {
+                return items;
+            }
+        }
+        return items;
+    }
+
+    private Map<UUID, Integer> sortMap(Map<UUID, Integer> map) {
+        return map.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+    }
+
+    private void getRecommendedCategoriesAndAvgPrices(List<Item> interestedIn, List<Double> listOfPrices, Map<UUID, Integer> recommendedCategories) {
+        for (Item item : interestedIn) {
+            if (!recommendedCategories.containsKey(item.getCategory().getId())) {
+                recommendedCategories
+                        .put(item.getCategory().getId(), 1);
+            } else {
+                recommendedCategories
+                        .computeIfPresent(item.getCategory().getId(), (k, v) -> v + 1);
+            }
+            listOfPrices.add(item.getStartPrice());
+        }
     }
 
     private void updateUserInfo(ItemRequest itemRequest, UUID id) {
