@@ -1,0 +1,31 @@
+FROM openjdk:latest as build
+
+WORKDIR /build
+
+COPY pom.xml mvnw ./
+
+COPY .mvn /build/.mvn
+
+RUN ./mvnw -B dependency:go-offline
+
+ENV SPRING_DATABASE_URL=jdbc:postgresql://192.168.1.57:5432/auctionapp?useSSL=false
+ENV SPRING_DATABASE_USERNAME=postgres
+ENV SPRING_DATABASE_PASSWORD=auction
+ENV aws_access_key=AKIA4KCKUJQPBPW3EJPE
+ENV aws_secret_key=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
+ENV APP_JWTSECRET=d178899b7beeb99ec2ebdad4636c7e21a2364494414013f78dd5a00725b77f14
+ENV STRIPE_SECRET_KEY=51N3gQwJfjmrWeWPQ
+
+COPY . .
+
+RUN ./mvnw clean install
+
+FROM openjdk:latest as runtime
+
+WORKDIR /app
+
+COPY --from=build /build/target/auctionapp-0.0.1-SNAPSHOT.jar /app
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "auctionapp-0.0.1-SNAPSHOT.jar"]
