@@ -38,10 +38,12 @@ const TableRow = ({ item, type }) => {
       }}
     >
       <td className="width-10">
-        <img
-          src={`${BASE_S3_URL}/${item.sellerId}/${images[0]?.url}`}
-          alt="item"
-        />
+        {item && images && (
+          <img
+            src={`${BASE_S3_URL}/${item.sellerId}/${images[0]?.url}`}
+            alt="item"
+          />
+        )}
       </td>
       <td className="width-32">
         <div>{item.name}</div>
