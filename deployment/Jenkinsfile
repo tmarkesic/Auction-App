@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/Dockerimages']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/tmarkesic/Auction-App.git']]])
+                sh "ls -lart ./*"
+            }
+        }
+        
+        stage('Build database') {
+	        steps {
+		        dir('./auctionapp/src/main/resource/') {
+			        sh 'docker build -f ../../../../deployment/Dockerfile_DB -t tmarkesic/auction-db .'
+	            }
+	        }	
+	    }
+
+	stage('Build backend') {
+	    steps {
+		    dir('./auctionapp') {
+		         withCredentials([string(credentialsId: 'AWS_ACCESS_ID', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'AWS_SECRET_ID', variable: 'AWS_SECRET_KEY')]) {			    
+                    		sh 'chmod +x mvnw'
+		                sh 'docker run --rm -d -p 5432:5432 --name auction-db tmarkesic/auction-db
+                    		sh 'docker build -f ../deployment/Dockerfile_BE --build-arg aws_access_key=${AWS_ACCESS_KEY} --build-arg aws_secret_key=${AWS_SECRET_KEY} -t tmarksic/auction-be .'
+				sh 'docker stop auction-db'
+		         }
+		    }
+	     }
+	}
+
+        stage('Build frontend') {
+            steps {
+                dir('./frontend') {
+                        sh 'docker build -f ../deployment/Dockerfile_FE -t tmarksic/auction-fe .'
+                }
+             }
+        }  
+        
+        stage('Push to Dockerhub') {
+            steps {
+                sh 'docker push tmarkesic/auction-db'
+                sh 'docker push tmarkesic/auction-be'
+                sh 'docker push tmarkesic/auction-fe'
+            }
+        }  
+    }
+}

@@ -1,0 +1,34 @@
+version: '3'
+
+ services:
+   auctionapp-db:
+     image: tmarkesic/auction-db
+     environment:
+       POSTGRES_DB: auctionapp
+       POSTGRES_USER: postgres
+       POSTGRES_PASSWORD: auction
+
+   auctionapp-be:
+     image: tmarkesic/auction-be
+     environment: 
+       SPRING_DATASOURCE_URL: jdbc:postgresql://auctionapp-db:5432/auctionapp?useSSL=false
+       SPRING_DATASOURCE_USERNAME: postgres
+       SPRING_DATASOURCE_PASSWORD: auction
+       aws_access_key: ${AWS_ACCESS_KEY}
+       aws_secret_key: ${AWS_SECRET_KEY}
+       APP_JWTSECRET: ${APP_JWTSECRET}
+     ports:
+       - "8080:8080"
+     depends_on:
+       - auctionapp-db
+
+   auctionapp-fe:
+     image: tmarkesic/auction-fe
+     ports:
+       - "3000:80"
+     depends_on:
+       - auctionapp-be
+
+ networks:
+   auctionapp-network:
+     driver: bridge
