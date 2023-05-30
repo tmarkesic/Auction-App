@@ -14,7 +14,6 @@ pipeline {
 	        steps {
 		        dir('./auctionapp') {
 		             withCredentials([string(credentialsId: 'AWS_ACCESS_ID', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'AWS_SECRET_ID', variable: 'AWS_SECRET_KEY')]) {			    
-                    		sh 'chmod +x mvnw'
 		                sh 'docker run --rm -d -p 5432:5432 --name auction-db tmarkesic/auction-db'
                     		sh 'docker build -f ../deployment/Dockerfile_BE --build-arg aws_access_key=${AWS_ACCESS_KEY} --build-arg aws_secret_key=${AWS_SECRET_KEY} -t tmarkesic/auction-be .'
 				sh 'docker rm -f auction-db'
