@@ -1,0 +1,12 @@
+FROM postgres:latest
+
+# Set environment variables
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD auction
+ENV POSTGRES_DB auctionapp
+
+COPY .  /docker-entrypoint-initdb.d/
+
+EXPOSE 5432
+
+CMD ["postgres"] 
