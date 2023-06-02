@@ -1,7 +1,8 @@
 import classNames from "classnames";
 import { Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import Breadcrumbs from "../../components/Breadcrumbs/Breadcrumbs";
 import Button from "../../components/Button/Button";
 import Gallery from "../../components/Gallery/Gallery";
@@ -10,26 +11,54 @@ import Payment from "../../components/Payment/Payment";
 import PopUp from "../../components/PopUp/PopUp";
 import Tabs from "../../components/Tabs/Tabs";
 import useAuth from "../../hooks/useAuth";
+import useToast from "../../hooks/useToast";
 import { ArrowRight } from "../../resources/icons";
 import { addNewBid, bidService } from "../../services/bidService";
+import { eventSourceService } from "../../services/eventSourceService";
 import { itemService } from "../../services/itemService";
 import { newBidValidationSchema } from "../../utils/formValidation";
 import { utils } from "../../utils/utils";
 import "./product-overview.scss";
 
 const ProductOverview = () => {
+  const { id } = useParams();
+  const { auth } = useAuth();
+  const { infoToast } = useToast();
+  const location = useLocation();
+
   const [item, setItem] = useState([]);
   const [notificationMsg, setNotificationMsg] = useState("");
   const [notificationClassName, setNotificatonClassName] = useState("");
   const [successfulBid, setSuccessfulBid] = useState(false);
   const [isUserHighestBidder, setIsUserHighestBidder] = useState(false);
-  const [openPopUpPayment, setOpenPopUpPayment] = useState(false);
+  const [highestBid, setHighestBid] = useState();
+  const [numberOfBids, setNumberOfBids] = useState();
+  const [openPopUpPayment, setOpenPopUpPayment] = useState(
+    location.state || false
+  );
   const [openPopUpBid, setOpenPopUpBid] = useState(false);
   const [isBought, setIsBought] = useState(false);
   const [formValues, setFormValues] = useState([]);
 
-  const { id } = useParams();
-  const { auth } = useAuth();
+  useEffect(() => {
+    if (item.name && !utils.hasDatePassed(item.endDate)) {
+      let eventSource = eventSourceService.newItemUpdateEventSourcePolyfill();
+      eventSource.onerror = () => {
+        eventSource.close();
+      };
+      eventSource.addEventListener(item?.id, handleItemUpdate);
+      return () => eventSource.close();
+    }
+  }, [item]);
+
+  const handleItemUpdate = (e) => {
+    const data = JSON.parse(e.data);
+    setHighestBid(utils.parseNum(data.amount));
+    setNumberOfBids((current) => current + 1);
+    if (data.userId !== auth?.user?.id) {
+      infoToast("New bid on current product!");
+    }
+  };
 
   useEffect(() => {
     if (Object.keys(auth).length !== 0) {
@@ -43,6 +72,8 @@ const ProductOverview = () => {
     setSuccessfulBid(false);
     itemService.getItemById(id).then((res) => {
       setItem(res);
+      setHighestBid(utils.parseNum(res.highestBid));
+      setNumberOfBids(res.noBids);
       if (res.buyerId) {
         setIsBought(true);
       }
@@ -50,9 +81,9 @@ const ProductOverview = () => {
   }, [id, successfulBid]);
 
   const price = utils.parseNum(item.startPrice);
-  const highestBid = utils.parseNum(item.highestBid);
   const timeLeft = utils.convertDate(item.endDate);
-  const newBid = utils.addFloats(highestBid, 1);
+  const newBid =
+    highestBid && highestBid > 0 ? utils.addFloats(highestBid, 1) : price;
   const hasEndDatePassed = utils.hasDatePassed(item.endDate);
 
   const submitBid = async (value) => {
@@ -63,7 +94,7 @@ const ProductOverview = () => {
         amount: value.amount,
       };
       await addNewBid(bid, auth?.accessToken);
-      if (value.amount > highestBid) {
+      if (value.amount > newBid - 1) {
         setNotificationMsg("You are the highest bidder!");
         setNotificatonClassName("valid-amount");
         setSuccessfulBid(true);
@@ -73,7 +104,7 @@ const ProductOverview = () => {
       if (!error?.response) {
         setNotificationMsg("No Server Response");
       } else if (error.response?.status === 400) {
-        if (value.amount <= highestBid) {
+        if (value.amount <= newBid - 1) {
           setNotificationMsg("There are higher bids than yours.");
           setNotificatonClassName("invalid-amount");
         }
@@ -90,6 +121,7 @@ const ProductOverview = () => {
 
   return (
     <div className="overview-page">
+      <ToastContainer />
       {openPopUpPayment && (
         <PopUp closePopUp={setOpenPopUpPayment} className="payment-modal">
           <Payment item={item} isBought={setIsBought} />
@@ -147,7 +179,7 @@ const ProductOverview = () => {
               Highest bid: <span>${highestBid}</span>
             </p>
             <p>
-              Number of bids: <span>{item.noBids}</span>
+              Number of bids: <span>{numberOfBids}</span>
             </p>
             {hasEndDatePassed ? (
               <p>
